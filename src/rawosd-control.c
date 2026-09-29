@@ -17,7 +17,7 @@ get_property(Display *display, Window window, Atom property, Atom type,
   unsigned char *data = NULL;
   int status;
 
-  status = XGetWindowProperty(display, window, property, 0, LONG_MAX / 4,
+  status = XGetWindowProperty(display, window, property, 0, 65536,
                               False, type, &actual, format, count, &after,
                               &data);
   if (status != Success || actual != type || after != 0)

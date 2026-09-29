@@ -20,3 +20,29 @@ present_test = executable(
 )
 
 test('present', present_test)
+
+control_owner_test_bin = executable(
+  'control-owner-test',
+  'control-owner-test.c',
+  rawosd_protocol_source,
+  rawosd_control_source,
+  include_directories: rawosd_src_include,
+  dependencies: x11_dep,
+  build_by_default: false,
+)
+
+control_owner_test = find_program('control-owner.sh')
+xvfb_program = find_program('Xvfb', required: false, native: true)
+xwininfo_program = find_program('xwininfo', required: false, native: true)
+if xvfb_program.found() and xwininfo_program.found()
+  test(
+    'control-owner',
+    control_owner_test,
+    args: [control_owner_test_bin],
+    env: [
+      'RAWOSD_TEST_XVFB=' + xvfb_program.full_path(),
+      'RAWOSD_TEST_XWININFO=' + xwininfo_program.full_path(),
+    ],
+    workdir: meson.project_source_root(),
+  )
+endif

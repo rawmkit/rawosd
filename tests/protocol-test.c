@@ -42,6 +42,10 @@ test_feedback(void)
            "rawm-feedback-v1\t42\tview\t1\t5",
            &feedback, NULL) < 0,
          "short feedback accepted");
+  expect(rawosd_feedback_parse(
+           "rawm-feedback-v1\t42\tview\t1\t5\t0\textra",
+           &feedback, NULL) < 0,
+         "long feedback accepted");
 }
 
 static void
@@ -92,6 +96,12 @@ test_state(void)
            "unknown\t0\n",
            &state, NULL) < 0,
          "unknown state record accepted");
+  expect(rawosd_state_parse(
+           "rawm-state-v1\ntag-count\t1\nselected-monitor\t0\n"
+           "monitor\t0\t1\t0\t0\t800\t600\t00000001\t00000001\t00000000\ttile\t0x0\t1\t0.550000\n"
+           "tag\t0\t1\t1\n",
+           &state, NULL) < 0,
+         "state without stack record accepted");
   rawosd_state_destroy(&state);
 }
 

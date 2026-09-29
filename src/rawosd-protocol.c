@@ -145,10 +145,12 @@ split_fields(char *line, char **fields, size_t capacity)
   if (!line || !*line || capacity == 0)
     return 0;
 
-  while (count < capacity)
+  for (;;)
   {
     char *tab;
 
+    if (count == capacity)
+      return capacity + 1u;
     fields[count++] = p;
     tab = strchr(p, '\t');
     if (!tab)
@@ -156,8 +158,6 @@ split_fields(char *line, char **fields, size_t capacity)
     *tab = '\0';
     p = tab + 1;
   }
-  if (strchr(p, '\t'))
-    return capacity + 1;
   return count;
 }
 
@@ -289,6 +289,7 @@ state_add_monitor(RawosdState *state)
   state->monitors = monitors;
   monitor = &state->monitors[state->monitor_count++];
   memset(monitor, 0, sizeof(*monitor));
+  monitor->visible_count = UINT_MAX;
   monitor->tags = calloc(state->tag_count, sizeof(*monitor->tags));
   if (!monitor->tags)
   {
@@ -359,6 +360,20 @@ decode_text(const char *text)
 }
 
 static int
+layout_valid(const char *name)
+{
+  static const char *const names[] = {
+    "tile", "floating", "monocle", "bstack", "bstack_horizontal", "grid",
+  };
+  size_t i;
+
+  for (i = 0; i < sizeof(names) / sizeof(names[0]); ++i)
+    if (strcmp(name, names[i]) == 0)
+      return 1;
+  return 0;
+}
+
+static int
 parse_monitor_record(RawosdState *state, char **fields, size_t count)
 {
   RawosdMonitorState *monitor;
@@ -380,10 +395,11 @@ parse_monitor_record(RawosdState *state, char **fields, size_t count)
       parse_u32_hex(fields[7], &monitor->viewed) < 0 ||
       parse_u32_hex(fields[8], &monitor->occupied) < 0 ||
       parse_u32_hex(fields[9], &monitor->urgent) < 0 ||
-      strlen(fields[10]) >= sizeof(monitor->layout) ||
+      strlen(fields[10]) >= sizeof(monitor->layout) || !layout_valid(fields[10]) ||
       parse_ulong_hex(fields[11], &monitor->focused) < 0 ||
-      parse_int(fields[12], &monitor->nmaster) < 0 ||
-      parse_double(fields[13], &monitor->mfact) < 0)
+      parse_int(fields[12], &monitor->nmaster) < 0 || monitor->nmaster < 0 ||
+      parse_double(fields[13], &monitor->mfact) < 0 ||
+      monitor->mfact < 0.1 || monitor->mfact > 0.9)
     return -1;
   monitor->selected = selected;
   memcpy(monitor->layout, fields[10], strlen(fields[10]) + 1u);
@@ -399,7 +415,8 @@ parse_stack_record(RawosdState *state, char **fields, size_t count)
   if (count != 4 || parse_int(fields[1], &number) < 0)
     return -1;
   monitor = state_monitor_mutable(state, number);
-  if (!monitor || parse_uint(fields[2], &monitor->focused_index) < 0 ||
+  if (!monitor || monitor->visible_count != UINT_MAX ||
+      parse_uint(fields[2], &monitor->focused_index) < 0 ||
       parse_uint(fields[3], &monitor->visible_count) < 0 ||
       monitor->focused_index > monitor->visible_count)
     return -1;
@@ -503,16 +520,37 @@ rawosd_state_parse(const char *snapshot, RawosdState *state, FILE *err)
       goto malformed;
   }
 
-  for (i = 0; i < parsed.monitor_count; ++i)
   {
-    size_t j;
-    for (j = 0; j < parsed.tag_count; ++j)
-      if (!parsed.monitors[i].tags[j])
+    uint32_t valid_mask = parsed.tag_count == 31
+                            ? 0x7fffffffu
+                            : ((1u << parsed.tag_count) - 1u);
+    size_t selected_count = 0;
+
+    for (i = 0; i < parsed.monitor_count; ++i)
+    {
+      size_t j;
+      RawosdMonitorState *monitor = &parsed.monitors[i];
+      if (monitor->visible_count == UINT_MAX ||
+          (monitor->viewed & ~valid_mask) != 0 ||
+          (monitor->occupied & ~valid_mask) != 0 ||
+          (monitor->urgent & ~valid_mask) != 0)
         goto malformed;
+      if (monitor->selected)
+      {
+        ++selected_count;
+        if (monitor->number != parsed.selected_monitor)
+          goto malformed;
+      }
+      for (j = 0; j < parsed.tag_count; ++j)
+        if (!monitor->tags[j])
+          goto malformed;
+    }
+    if ((parsed.selected_monitor < 0 && selected_count != 0) ||
+        (parsed.selected_monitor >= 0 &&
+         (selected_count != 1 ||
+          !rawosd_state_monitor(&parsed, parsed.selected_monitor))))
+      goto malformed;
   }
-  if (parsed.selected_monitor >= 0 &&
-      !rawosd_state_monitor(&parsed, parsed.selected_monitor))
-    goto malformed;
 
   free(copy);
   rawosd_state_destroy(state);
