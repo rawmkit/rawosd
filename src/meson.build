@@ -1,2 +1,4 @@
 rawosd_protocol_source = files('rawosd-protocol.c')
 rawosd_src_include = include_directories('.')
+rawosd_config_source = files('rawosd-config.c')
+rawosd_present_source = files('rawosd-present.c')

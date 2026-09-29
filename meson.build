@@ -17,5 +17,18 @@ add_project_arguments(
   language: 'c',
 )
 
+libconfig_dep = dependency('libconfig')
+
+sysconfdir = get_option('sysconfdir')
+runtime_sysconfdir = sysconfdir
+if not runtime_sysconfdir.startswith('/')
+  runtime_sysconfdir = join_paths(get_option('prefix'), runtime_sysconfdir)
+endif
+add_project_arguments(
+  '-DSYSCONFDIR=\"@0@\"'.format(runtime_sysconfdir),
+  language: 'c',
+)
+
 subdir('src')
+subdir('config')
 subdir('tests')
