@@ -114,6 +114,13 @@ test_state(void)
            "tag\t0\t1\t1\n",
            &state, NULL) < 0,
          "state without stack record accepted");
+  expect(rawosd_state_parse(
+           "rawm-state-v1\ntag-count\t1\nselected-monitor\t0\n"
+           "monitor\t0\t1\t0\t0\t800\t600\t+0000001\t00000001\t00000000\ttile\t0x0\t1\t0.550000\n"
+           "stack\t0\t0\t0\n"
+           "tag\t0\t1\t1\n",
+           &state, NULL) < 0,
+         "non-canonical tag mask accepted");
   rawosd_state_destroy(&state);
 }
 

@@ -46,9 +46,15 @@ parse_u32_hex(const char *text, uint32_t *value)
 {
   char *end = NULL;
   unsigned long parsed;
+  size_t i;
 
   if (!text || strlen(text) != 8u)
     return -1;
+  for (i = 0; i < 8u; ++i)
+    if (!((text[i] >= '0' && text[i] <= '9') ||
+          (text[i] >= 'a' && text[i] <= 'f') ||
+          (text[i] >= 'A' && text[i] <= 'F')))
+      return -1;
   errno = 0;
   parsed = strtoul(text, &end, 16);
   if (errno || !end || end == text || *end || parsed > UINT32_MAX)
