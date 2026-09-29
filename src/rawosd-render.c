@@ -393,26 +393,32 @@ int
 rawosd_renderer_reconfigure(RawosdRenderer *renderer,
                             RawosdConfig *config, FILE *err)
 {
-  RawosdConfig *old_config;
+  RawosdRenderer next;
 
   if (!renderer || !config)
     return -1;
-  old_config = renderer->config;
+  memset(&next, 0, sizeof(next));
+  next.display = renderer->display;
+  next.screen = renderer->screen;
+
+  if (load_font(&next, config->font, err) < 0 ||
+      load_colors(&next, config, err) < 0)
+  {
+    free_colors(&next);
+    free_font(&next);
+    return -1;
+  }
+
   rawosd_renderer_hide(renderer);
   free_colors(renderer);
   free_font(renderer);
+  renderer->font = next.font;
+  memcpy(renderer->colors, next.colors, sizeof(renderer->colors));
+  memcpy(renderer->color_allocated, next.color_allocated,
+         sizeof(renderer->color_allocated));
+  memset(&next.font, 0, sizeof(next.font));
+  memset(next.color_allocated, 0, sizeof(next.color_allocated));
   renderer->config = config;
-  if (load_font(renderer, config->font, err) < 0 ||
-      load_colors(renderer, config, err) < 0)
-  {
-    renderer->config = old_config;
-    free_colors(renderer);
-    free_font(renderer);
-    if (load_font(renderer, old_config->font, err) < 0 ||
-        load_colors(renderer, old_config, err) < 0)
-      return -1;
-    return -1;
-  }
   XSetWindowBackground(renderer->display, renderer->window,
                        renderer->colors[RAWOSD_SCHEME_NORMAL]
                                        [RAWOSD_COLOR_BACKGROUND].pixel);

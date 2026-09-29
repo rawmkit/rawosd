@@ -146,6 +146,7 @@ main(int argc, char **argv)
   int option;
   uint64_t next_owner_poll;
   struct pollfd pfd;
+  int exit_status = EXIT_SUCCESS;
 
   while ((option = getopt(argc, argv, "c:hv")) != -1)
   {
@@ -255,6 +256,7 @@ main(int argc, char **argv)
     if (rc < 0 && errno != EINTR)
     {
       fprintf(stderr, "rawosd: poll failed: %s\n", strerror(errno));
+      exit_status = EXIT_FAILURE;
       break;
     }
   }
@@ -262,5 +264,5 @@ main(int argc, char **argv)
   rawosd_renderer_destroy(&renderer);
   rawosd_config_destroy(&config);
   XCloseDisplay(display);
-  return EXIT_SUCCESS;
+  return exit_status;
 }

@@ -76,6 +76,13 @@ read_utf8_property(RawosdControl *control, Atom property, FILE *err)
       XFree(data);
     return NULL;
   }
+  if (memchr(data, '\0', count) != NULL)
+  {
+    XFree(data);
+    if (err)
+      fputs("rawosd: rawm UTF-8 property contains NUL data\n", err);
+    return NULL;
+  }
   copy = malloc(count + 1u);
   if (!copy)
   {

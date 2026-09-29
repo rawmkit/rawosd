@@ -2,6 +2,7 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -46,11 +47,11 @@ parse_u32_hex(const char *text, uint32_t *value)
   char *end = NULL;
   unsigned long parsed;
 
-  if (!text || !*text)
+  if (!text || strlen(text) != 8u)
     return -1;
   errno = 0;
   parsed = strtoul(text, &end, 16);
-  if (errno || !end || *end || parsed > UINT32_MAX)
+  if (errno || !end || end == text || *end || parsed > UINT32_MAX)
     return -1;
   *value = (uint32_t)parsed;
   return 0;
@@ -62,11 +63,11 @@ parse_uint(const char *text, unsigned int *value)
   char *end = NULL;
   unsigned long parsed;
 
-  if (!text || !*text)
+  if (!text || !*text || text[0] == '-' || text[0] == '+')
     return -1;
   errno = 0;
   parsed = strtoul(text, &end, 10);
-  if (errno || !end || *end || parsed > UINT_MAX)
+  if (errno || !end || end == text || *end || parsed > UINT_MAX)
     return -1;
   *value = (unsigned int)parsed;
   return 0;
@@ -78,11 +79,11 @@ parse_size(const char *text, size_t *value)
   char *end = NULL;
   unsigned long long parsed;
 
-  if (!text || !*text)
+  if (!text || !*text || text[0] == '-' || text[0] == '+')
     return -1;
   errno = 0;
   parsed = strtoull(text, &end, 10);
-  if (errno || !end || *end || parsed > SIZE_MAX)
+  if (errno || !end || end == text || *end || parsed > SIZE_MAX)
     return -1;
   *value = (size_t)parsed;
   return 0;
@@ -94,11 +95,11 @@ parse_u64(const char *text, uint64_t *value)
   char *end = NULL;
   unsigned long long parsed;
 
-  if (!text || !*text)
+  if (!text || !*text || text[0] == '-' || text[0] == '+')
     return -1;
   errno = 0;
   parsed = strtoull(text, &end, 10);
-  if (errno || !end || *end)
+  if (errno || !end || end == text || *end || parsed > UINT64_MAX)
     return -1;
   *value = (uint64_t)parsed;
   return 0;
@@ -114,7 +115,7 @@ parse_ulong_hex(const char *text, unsigned long *value)
     return -1;
   errno = 0;
   parsed = strtoul(text + 2, &end, 16);
-  if (errno || !end || *end)
+  if (errno || !end || end == text + 2 || *end)
     return -1;
   *value = parsed;
   return 0;
@@ -130,7 +131,7 @@ parse_double(const char *text, double *value)
     return -1;
   errno = 0;
   parsed = strtod(text, &end);
-  if (errno || !end || *end)
+  if (errno || !end || end == text || *end || !isfinite(parsed))
     return -1;
   *value = parsed;
   return 0;
@@ -209,6 +210,43 @@ rawosd_feedback_event_name(RawosdFeedbackEvent event)
   return names[event];
 }
 
+static int
+feedback_semantics_valid(const RawosdFeedback *feedback)
+{
+  if (!feedback || feedback->serial == 0 || feedback->monitor < 0)
+    return 0;
+
+  switch (feedback->event)
+  {
+    case RAWOSD_FEEDBACK_MONITOR:
+      return feedback->arg0 == feedback->monitor && feedback->arg1 == 0;
+    case RAWOSD_FEEDBACK_MASTER_COUNT:
+      return feedback->arg0 >= 0 && feedback->arg1 == 0;
+    case RAWOSD_FEEDBACK_MASTER_FACTOR:
+      return feedback->arg0 >= 100000 && feedback->arg0 <= 900000 &&
+             feedback->arg1 == 0;
+    case RAWOSD_FEEDBACK_MOVE:
+      return 1;
+    case RAWOSD_FEEDBACK_RESIZE:
+      return feedback->arg0 > 0 && feedback->arg1 > 0;
+    case RAWOSD_FEEDBACK_VIEW:
+    case RAWOSD_FEEDBACK_TAG:
+    case RAWOSD_FEEDBACK_TOGGLE_TAG:
+      return feedback->arg0 > 0 && feedback->arg1 == 0;
+    case RAWOSD_FEEDBACK_LAYOUT:
+      return feedback->arg0 >= 0 && feedback->arg0 < 6 && feedback->arg1 == 0;
+    case RAWOSD_FEEDBACK_FLOATING:
+    case RAWOSD_FEEDBACK_FULLSCREEN:
+      return (feedback->arg0 == 0 || feedback->arg0 == 1) &&
+             feedback->arg1 == 0;
+    case RAWOSD_FEEDBACK_TAG_MONITOR:
+      return feedback->arg0 >= 0 && feedback->arg1 == 0;
+    case RAWOSD_FEEDBACK_EVENT_LAST:
+      return 0;
+  }
+  return 0;
+}
+
 int
 rawosd_feedback_parse(const char *record, RawosdFeedback *feedback, FILE *err)
 {
@@ -239,7 +277,8 @@ rawosd_feedback_parse(const char *record, RawosdFeedback *feedback, FILE *err)
       (parsed.event = feedback_event(fields[2])) == RAWOSD_FEEDBACK_EVENT_LAST ||
       parse_int(fields[3], &parsed.monitor) < 0 ||
       parse_i32(fields[4], &parsed.arg0) < 0 ||
-      parse_i32(fields[5], &parsed.arg1) < 0)
+      parse_i32(fields[5], &parsed.arg1) < 0 ||
+      !feedback_semantics_valid(&parsed))
   {
     free(copy);
     return fail(err, "malformed or unsupported feedback record");
@@ -346,7 +385,7 @@ decode_text(const char *text)
 
       errno = 0;
       value = strtol(hex, &end, 16);
-      if (!errno && end && *end == '\0')
+      if (!errno && end && *end == '\0' && value != 0)
       {
         decoded[out++] = (char)value;
         i += 2u;
@@ -457,6 +496,8 @@ rawosd_state_parse(const char *snapshot, RawosdState *state, FILE *err)
 
   if (!snapshot || !state)
     return fail(err, "invalid state parser arguments");
+  if (!*snapshot || strstr(snapshot, "\n\n") != NULL)
+    return fail(err, "malformed or unsupported state snapshot");
   copy = strdup(snapshot);
   if (!copy)
     return fail(err, "out of memory parsing state");

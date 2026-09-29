@@ -46,6 +46,14 @@ test_feedback(void)
            "rawm-feedback-v1\t42\tview\t1\t5\t0\textra",
            &feedback, NULL) < 0,
          "long feedback accepted");
+  expect(rawosd_feedback_parse(
+           "rawm-feedback-v1\t0\tlayout\t0\t1\t0",
+           &feedback, NULL) < 0,
+         "zero feedback serial accepted");
+  expect(rawosd_feedback_parse(
+           "rawm-feedback-v1\t43\tlayout\t0\t6\t0",
+           &feedback, NULL) < 0,
+         "invalid layout id accepted");
 }
 
 static void
@@ -87,6 +95,10 @@ test_state(void)
          "percent decoding differs");
   rawosd_state_destroy(&state);
 
+  expect(rawosd_state_parse(
+           "rawm-state-v1\n\ntag-count\t1\nselected-monitor\t-1\n",
+           &state, NULL) < 0,
+         "blank state record accepted");
   expect(rawosd_state_parse(
            "rawm-state-v2\ntag-count\t1\nselected-monitor\t-1\n",
            &state, NULL) < 0,
