@@ -86,10 +86,31 @@ check_group_names(config_setting_t *group, const char *const *names,
   return 0;
 }
 
+static config_setting_t *
+lookup_path(config_setting_t *root, const char *path)
+{
+  char *copy;
+  char *save = NULL;
+  char *part;
+  config_setting_t *setting = root;
+
+  copy = strdup(path);
+  if (!copy)
+    return NULL;
+  part = strtok_r(copy, ".", &save);
+  while (part && setting)
+  {
+    setting = config_setting_lookup(setting, part);
+    part = strtok_r(NULL, ".", &save);
+  }
+  free(copy);
+  return setting;
+}
+
 static int
 read_string(config_setting_t *root, const char *path, char **target, FILE *err)
 {
-  config_setting_t *setting = config_setting_lookup(root, path);
+  config_setting_t *setting = lookup_path(root, path);
   const char *value;
 
   if (!setting)
@@ -106,7 +127,7 @@ read_string(config_setting_t *root, const char *path, char **target, FILE *err)
 static int
 read_bool(config_setting_t *root, const char *path, bool *target, FILE *err)
 {
-  config_setting_t *setting = config_setting_lookup(root, path);
+  config_setting_t *setting = lookup_path(root, path);
 
   if (!setting)
     return 0;
@@ -120,7 +141,7 @@ static int
 read_uint(config_setting_t *root, const char *path, unsigned int *target,
           FILE *err)
 {
-  config_setting_t *setting = config_setting_lookup(root, path);
+  config_setting_t *setting = lookup_path(root, path);
   int value;
 
   if (!setting)

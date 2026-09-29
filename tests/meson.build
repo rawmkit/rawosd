@@ -46,3 +46,35 @@ if xvfb_program.found() and xwininfo_program.found()
     workdir: meson.project_source_root(),
   )
 endif
+
+config_defaults_test = executable(
+  'config-defaults-test',
+  'config-defaults-test.c',
+  rawosd_config_source,
+  include_directories: rawosd_src_include,
+  dependencies: libconfig_dep,
+  build_by_default: false,
+)
+
+config_probe = executable(
+  'config-probe',
+  'config-probe.c',
+  rawosd_config_source,
+  include_directories: rawosd_src_include,
+  dependencies: libconfig_dep,
+  build_by_default: false,
+)
+
+test(
+  'config-defaults',
+  config_defaults_test,
+  args: [join_paths(meson.project_source_root(), 'config', 'rawosd.conf')],
+)
+
+config_test = find_program('config.sh')
+test(
+  'config',
+  config_test,
+  args: [config_probe],
+  workdir: meson.project_source_root(),
+)
