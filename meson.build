@@ -17,6 +17,9 @@ add_project_arguments(
   language: 'c',
 )
 
+x11_dep = dependency('x11')
+xft_dep = dependency('xft')
+fontconfig_dep = dependency('fontconfig')
 libconfig_dep = dependency('libconfig')
 
 sysconfdir = get_option('sysconfdir')
