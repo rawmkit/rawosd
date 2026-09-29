@@ -78,3 +78,37 @@ test(
   args: [config_probe],
   workdir: meson.project_source_root(),
 )
+
+fake_rawm = executable(
+  'fake-rawm',
+  'fake-rawm.c',
+  dependencies: x11_dep,
+  build_by_default: false,
+)
+
+window_probe = executable(
+  'window-probe',
+  'window-probe.c',
+  dependencies: x11_dep,
+  build_by_default: false,
+)
+
+renderer_test = find_program('renderer.sh')
+if xvfb_program.found() and xwininfo_program.found()
+  test(
+    'renderer',
+    renderer_test,
+    args: [
+      rawosd,
+      fake_rawm,
+      window_probe,
+      join_paths(meson.project_source_root(), 'tests', 'renderer.conf'),
+    ],
+    env: [
+      'RAWOSD_TEST_XVFB=' + xvfb_program.full_path(),
+      'RAWOSD_TEST_XWININFO=' + xwininfo_program.full_path(),
+    ],
+    workdir: meson.project_source_root(),
+    timeout: 15,
+  )
+endif

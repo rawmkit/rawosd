@@ -413,6 +413,9 @@ rawosd_renderer_reconfigure(RawosdRenderer *renderer,
       return -1;
     return -1;
   }
+  XSetWindowBackground(renderer->display, renderer->window,
+                       renderer->colors[RAWOSD_SCHEME_NORMAL]
+                                       [RAWOSD_COLOR_BACKGROUND].pixel);
   return 0;
 }
 
@@ -554,7 +557,7 @@ rawosd_renderer_is_expose(const RawosdRenderer *renderer,
 void
 rawosd_renderer_redraw(RawosdRenderer *renderer)
 {
-  if (!renderer || !renderer->visible || renderer->pixmap == None)
+  if (!renderer || renderer->pixmap == None || renderer->window == None)
     return;
   XCopyArea(renderer->display, renderer->pixmap, renderer->window,
             renderer->gc, 0, 0, renderer->width, renderer->height, 0, 0);
