@@ -109,6 +109,9 @@ Install with:
 meson install -C build
 ```
 
+Validate configuration without opening X11 with `rawosd -C` or
+`rawosd -C -c /path/to/rawosd.conf`.
+
 ## Session integration
 
 Run one `rawosd` instance in the graphical session, under the same session

@@ -6,7 +6,7 @@ rawosd - transient feedback renderer for rawm
 
 # SYNOPSIS
 
-*rawosd* [*-c* _path_] [*-v*]
+*rawosd* [*-C*] [*-c* _path_] [*-v*]
 
 # DESCRIPTION
 

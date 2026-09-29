@@ -112,3 +112,9 @@ if xvfb_program.found() and xwininfo_program.found()
     timeout: 15,
   )
 endif
+
+test(
+  'cli-config-check',
+  rawosd,
+  args: ['-C', '-c', meson.project_source_root() / 'config' / 'rawosd.conf'],
+)

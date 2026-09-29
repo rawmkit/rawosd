@@ -76,7 +76,7 @@ xerror(Display *display, XErrorEvent *event)
 static void
 usage(FILE *stream)
 {
-  fprintf(stream, "usage: rawosd [-c path] [-v]\n");
+  fprintf(stream, "usage: rawosd [-C] [-c path] [-v]\n");
 }
 
 static int
@@ -144,14 +144,18 @@ main(int argc, char **argv)
   Display *display;
   int screen;
   int option;
+  bool check = false;
   uint64_t next_owner_poll;
   struct pollfd pfd;
   int exit_status = EXIT_SUCCESS;
 
-  while ((option = getopt(argc, argv, "c:hv")) != -1)
+  while ((option = getopt(argc, argv, "Cc:hv")) != -1)
   {
     switch (option)
     {
+      case 'C':
+        check = true;
+        break;
       case 'c':
         config_path = optarg;
         break;
@@ -177,6 +181,11 @@ main(int argc, char **argv)
   {
     rawosd_config_destroy(&config);
     return EXIT_FAILURE;
+  }
+  if (check)
+  {
+    rawosd_config_destroy(&config);
+    return EXIT_SUCCESS;
   }
   display = XOpenDisplay(NULL);
   if (!display)
