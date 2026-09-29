@@ -34,4 +34,11 @@ add_project_arguments(
 
 subdir('src')
 subdir('config')
+subdir('docs')
 subdir('tests')
+
+install_data(
+  'README.md',
+  'NEWS.md',
+  install_dir: join_paths(get_option('datadir'), 'doc', 'rawosd'),
+)

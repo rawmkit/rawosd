@@ -1,0 +1,91 @@
+rawosd(1)
+
+# NAME
+
+rawosd - transient feedback renderer for rawm
+
+# SYNOPSIS
+
+*rawosd* [*-c* _path_] [*-v*]
+
+# DESCRIPTION
+
+*rawosd* renders short-lived semantic feedback published by rawm through the
+public rawm control membrane. It owns presentation only. Window-manager truth
+remains in rawm's *_RAWM_STATE* and *_RAWM_CLIENTS* snapshots.
+
+The daemon discovers the rawm control selection for the current X screen,
+validates protocol version 1, baselines the current *_RAWM_FEEDBACK* serial, and
+waits for later feedback property changes. It rereads *_RAWM_STATE* before
+formatting every accepted event.
+
+Starting *rawosd* enables transient presentation; stopping it disables the
+presentation. No rawm restart or configuration change is required.
+
+# OPTIONS
+
+*-c* _path_
+	Load only the specified configuration file. The path must exist.
+
+*-h*
+	Print usage and exit.
+
+*-v*
+	Print the rawosd version and exit.
+
+# CONFIGURATION
+
+Without *-c*, rawosd layers:
+
+. */etc/rawosd/rawosd.conf*
+. *$XDG_CONFIG_HOME/rawosd/rawosd.conf*, when *XDG_CONFIG_HOME* is an absolute path
+. otherwise *~/.config/rawosd/rawosd.conf*
+
+Missing default files are allowed. See *rawosd.conf*(5).
+
+# SIGNALS
+
+*SIGHUP*
+	Reload configuration. If parsing, validation, font loading, or color
+	allocation fails, rawosd keeps the previous valid configuration.
+
+*SIGINT*, *SIGTERM*
+	Exit cleanly.
+
+# RAWM LIFECYCLE
+
+rawosd may start before rawm. While no *_RAWM_CONTROL_SN* owner exists, it waits
+without presenting anything. When a compatible owner appears, the current
+feedback record is baselined and not replayed.
+
+If the owner disappears, rawosd immediately hides its surface, discards the old
+owner XID and feedback serial, and waits for the replacement authority.
+
+# PRESENTATION
+
+The feedback surface is an override-redirect X11 notification window. Placement
+uses the full monitor geometry published in *_RAWM_STATE* version 1. rawosd does
+not derive work areas from docks, struts, EWMH properties, or the X window tree.
+
+Live move and resize records are ignored unless *geometry* is enabled in the
+rawosd configuration.
+
+# ENVIRONMENT
+
+*DISPLAY*
+	X display to use.
+
+*XDG_CONFIG_HOME*
+	Absolute base path for per-user configuration.
+
+*HOME*
+	Fallback base for *~/.config/rawosd/rawosd.conf*.
+
+# FILES
+
+*/etc/rawosd/rawosd.conf*
+	System presentation policy.
+
+# SEE ALSO
+
+*rawosd.conf*(5), *rawm*(1)
