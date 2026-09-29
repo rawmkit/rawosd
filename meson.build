@@ -28,7 +28,7 @@ if not runtime_sysconfdir.startswith('/')
   runtime_sysconfdir = join_paths(get_option('prefix'), runtime_sysconfdir)
 endif
 add_project_arguments(
-  '-DSYSCONFDIR=\"@0@\"'.format(runtime_sysconfdir),
+  '-DSYSCONFDIR="@0@"'.format(runtime_sysconfdir),
   language: 'c',
 )
 

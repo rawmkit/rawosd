@@ -24,7 +24,7 @@ per-user file may layer over it as described in *rawosd*(1).
 *geometry* = _boolean_
 	Render live move and resize feedback. Default: *false*.
 
-*duration_ms* = _integer_
+*duration\_ms* = _integer_
 	Visibility duration, from 100 through 5000 milliseconds. Default: 800.
 
 *padding* = _integer_
@@ -34,7 +34,7 @@ per-user file may layer over it as described in *rawosd*(1).
 	Distance from the selected top or bottom monitor edge, from 0 through 4096
 	pixels. Default: 24.
 
-*min_width* = _integer_
+*min\_width* = _integer_
 	Minimum surface width in pixels, from 0 through 8192. Default: 0.
 
 # COLORS
@@ -62,7 +62,7 @@ The *layouts* group owns presentation labels for rawm's stable layout IDs:
 - *floating*
 - *monocle*
 - *bstack*
-- *bstack_horizontal*
+- *bstack\_horizontal*
 - *grid*
 
 Each symbol is at most 32 bytes. Stock values are *[]=*, *<1/1>*, *[1/1]*,
