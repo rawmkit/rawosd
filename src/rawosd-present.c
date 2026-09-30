@@ -88,7 +88,7 @@ rawosd_present_format(const RawosdFeedback *feedback,
     return -1;
   memset(presentation, 0, sizeof(*presentation));
   presentation->monitor = feedback->monitor;
-  presentation->scheme = RAWOSD_SCHEME_NORMAL;
+  presentation->scheme = RAWOSD_SCHEME_SELECTED;
   monitor = rawosd_state_monitor(state, feedback->monitor);
   if (!monitor)
   {
@@ -147,7 +147,7 @@ rawosd_present_format(const RawosdFeedback *feedback,
       break;
     case RAWOSD_FEEDBACK_FLOATING:
       presentation->scheme = feedback->arg0 ? RAWOSD_SCHEME_FLOATING
-                                             : RAWOSD_SCHEME_NORMAL;
+                                             : RAWOSD_SCHEME_SELECTED;
       n = snprintf(presentation->text, sizeof(presentation->text), "%s",
                    feedback->arg0 ? "float" : "tile");
       break;

@@ -7,10 +7,10 @@
 #include <string.h>
 
 static const char snapshot[] =
-  "rawm-state-v1\n"
+  "rawm-state-v2\n"
   "tag-count\t3\n"
   "selected-monitor\t0\n"
-  "monitor\t0\t1\t0\t0\t1920\t1080\t00000003\t00000003\t00000000\ttile\t0x1\t1\t0.550000\n"
+  "monitor\t0\t1\t0\t0\t1920\t1080\t0\t24\t1920\t1056\t00000003\t00000003\t00000000\ttile\t0x1\t1\t0.550000\n"
   "stack\t0\t1\t1\n"
   "tag\t0\t1\twork\n"
   "tag\t0\t2\tweb\n"
@@ -91,6 +91,17 @@ main(void)
          strcmp(presentation.text, "x 11  ·  y 22") == 0 &&
          presentation.scheme == RAWOSD_SCHEME_FLOATING,
          "geometry presentation differs");
+
+  {
+    RawosdFeedback selected_feedback = {
+      .serial = 3, .event = RAWOSD_FEEDBACK_LAYOUT, .monitor = 0,
+      .arg0 = 0, .arg1 = 0
+    };
+    expect(rawosd_present_format(&selected_feedback, &state, &config,
+                                 &presentation, stderr) == 0 &&
+           presentation.scheme == RAWOSD_SCHEME_SELECTED,
+           "ordinary feedback did not use selected scheme");
+  }
 
   rawosd_state_destroy(&state);
   rawosd_config_destroy(&config);

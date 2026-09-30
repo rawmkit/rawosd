@@ -39,11 +39,11 @@ duration_ms = 5001;
 EOC
 
 expect_fail unknown-color <<'EOC'
-colors = { normal = { shadow = "#000000"; }; };
+colors = { selected = { shadow = "#000000"; }; };
 EOC
 
 expect_fail bad-color-type <<'EOC'
-colors = { normal = { foreground = 42; }; };
+colors = { selected = { foreground = 42; }; };
 EOC
 
 expect_fail long-layout-symbol <<'EOC'
@@ -63,7 +63,7 @@ padding = 8;
 offset = 12;
 min_width = 160;
 colors = {
-  normal = { foreground = "#ffffff"; background = "#111111"; accent = "#3366ff"; };
+  selected = { foreground = "#ffffff"; background = "#111111"; accent = "#3366ff"; };
   floating = { foreground = "#ffffff"; background = "#222222"; accent = "#ffcc00"; };
 };
 layouts = { tile = "T"; grid = "G"; };

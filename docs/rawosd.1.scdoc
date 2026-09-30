@@ -67,7 +67,7 @@ owner XID and feedback serial, and waits for the replacement authority.
 # PRESENTATION
 
 The feedback surface is an override-redirect X11 notification window. Placement
-uses the full monitor geometry published in *\_RAWM\_STATE* version 1. rawosd does
+uses the work-area geometry published in *\_RAWM\_STATE* version 2. rawosd does
 not derive work areas from docks, struts, EWMH properties, or the X window tree.
 
 Live move and resize records are ignored unless *geometry* is enabled in the

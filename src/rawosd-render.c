@@ -355,7 +355,7 @@ rawosd_renderer_init(RawosdRenderer *renderer, Display *display, int screen,
   memset(&attributes, 0, sizeof(attributes));
   attributes.override_redirect = True;
   attributes.background_pixel =
-    renderer->colors[RAWOSD_SCHEME_NORMAL][RAWOSD_COLOR_BACKGROUND].pixel;
+    renderer->colors[RAWOSD_SCHEME_SELECTED][RAWOSD_COLOR_BACKGROUND].pixel;
   attributes.event_mask = ExposureMask;
   renderer->window = XCreateWindow(
     display, renderer->root, 0, 0, 1, 1, 0,
@@ -420,7 +420,7 @@ rawosd_renderer_reconfigure(RawosdRenderer *renderer,
   memset(next.color_allocated, 0, sizeof(next.color_allocated));
   renderer->config = config;
   XSetWindowBackground(renderer->display, renderer->window,
-                       renderer->colors[RAWOSD_SCHEME_NORMAL]
+                       renderer->colors[RAWOSD_SCHEME_SELECTED]
                                        [RAWOSD_COLOR_BACKGROUND].pixel);
   return 0;
 }
@@ -452,21 +452,22 @@ rawosd_renderer_show(RawosdRenderer *renderer,
   renderer->width = MAX(text_width_value + 2u * padding,
                         renderer->config->min_width);
   renderer->height = (unsigned int)renderer->font.height + 2u * padding;
-  if (renderer->width > (unsigned int)monitor->width)
-    renderer->width = (unsigned int)monitor->width;
-  if (renderer->height > (unsigned int)monitor->height)
-    renderer->height = (unsigned int)monitor->height;
+  if (renderer->width > (unsigned int)monitor->work_width)
+    renderer->width = (unsigned int)monitor->work_width;
+  if (renderer->height > (unsigned int)monitor->work_height)
+    renderer->height = (unsigned int)monitor->work_height;
 
-  x = monitor->x + (monitor->width - (int)renderer->width) / 2;
+  x = monitor->work_x +
+      (monitor->work_width - (int)renderer->width) / 2;
   if (renderer->config->position == RAWOSD_POSITION_TOP)
-    y = monitor->y + (int)renderer->config->offset;
+    y = monitor->work_y + (int)renderer->config->offset;
   else
-    y = monitor->y + monitor->height - (int)renderer->height -
+    y = monitor->work_y + monitor->work_height - (int)renderer->height -
         (int)renderer->config->offset;
-  if (y < monitor->y)
-    y = monitor->y;
-  if (y + (int)renderer->height > monitor->y + monitor->height)
-    y = monitor->y + monitor->height - (int)renderer->height;
+  if (y < monitor->work_y)
+    y = monitor->work_y;
+  if (y + (int)renderer->height > monitor->work_y + monitor->work_height)
+    y = monitor->work_y + monitor->work_height - (int)renderer->height;
 
   if (renderer->pixmap != None)
     XFreePixmap(renderer->display, renderer->pixmap);

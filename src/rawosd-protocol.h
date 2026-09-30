@@ -38,6 +38,10 @@ typedef struct {
   int y;
   int width;
   int height;
+  int work_x;
+  int work_y;
+  int work_width;
+  int work_height;
   uint32_t viewed;
   uint32_t occupied;
   uint32_t urgent;

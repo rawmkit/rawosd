@@ -10,7 +10,7 @@ typedef enum {
 } RawosdPosition;
 
 typedef enum {
-  RAWOSD_SCHEME_NORMAL,
+  RAWOSD_SCHEME_SELECTED,
   RAWOSD_SCHEME_FLOATING,
   RAWOSD_SCHEME_LAST
 } RawosdScheme;

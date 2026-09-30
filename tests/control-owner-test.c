@@ -28,10 +28,10 @@ make_owner(Display *display, Atom selection, Atom version_atom,
   XSetWindowAttributes attributes;
   Window owner;
   static const char state[] =
-    "rawm-state-v1\n"
+    "rawm-state-v2\n"
     "tag-count\t1\n"
     "selected-monitor\t0\n"
-    "monitor\t0\t1\t0\t0\t800\t600\t00000001\t00000001\t00000000\ttile\t0x0\t1\t0.550000\n"
+    "monitor\t0\t1\t0\t0\t800\t600\t0\t0\t800\t600\t00000001\t00000001\t00000000\ttile\t0x0\t1\t0.550000\n"
     "stack\t0\t0\t0\n"
     "tag\t0\t1\t1\n";
 

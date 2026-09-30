@@ -13,7 +13,7 @@
 #endif
 
 static const char *const scheme_names[RAWOSD_SCHEME_LAST] = {
-  "normal",
+  "selected",
   "floating",
 };
 
@@ -162,7 +162,7 @@ apply_config(config_t *source, RawosdConfig *config, FILE *err)
     "font", "position", "geometry", "duration_ms", "padding", "offset",
     "min_width", "colors", "layouts",
   };
-  static const char *const color_group_names[] = { "normal", "floating" };
+  static const char *const color_group_names[] = { "selected", "floating" };
   static const char *const color_component_names[] = {
     "foreground", "background", "accent",
   };

@@ -38,7 +38,7 @@ truth.
 
 The daemon discovers rawm through `_RAWM_CONTROL_Sn` on its X screen. It requires
 control protocol version 1, consumes `_RAWM_FEEDBACK` version 1, and parses
-`_RAWM_STATE` version 1 fail-closed. Unknown versions, event kinds, state-record
+`_RAWM_STATE` version 2 fail-closed. Unknown versions, event kinds, state-record
 kinds, and malformed field counts are rejected.
 
 Repeated identical feedback is observable because rawm includes a process-local
@@ -74,11 +74,10 @@ configuration active.
 
 ### Monitor placement
 
-rawm state protocol v1 publishes full monitor rectangles. Therefore rawosd v0.1
-positions relative to that authoritative rectangle. It does not inspect docks,
-struts, the X window tree, or EWMH state to synthesize a work area. If panel-aware
-placement becomes required, rawm should publish that authority explicitly in a
-future protocol version.
+rawm state protocol v2 publishes both full monitor rectangles and the authoritative
+work area after dock/strut reservations. rawosd positions entirely inside that
+work area. It does not inspect docks, struts, the X window tree, or EWMH state to
+reconstruct placement authority.
 
 ## Build
 

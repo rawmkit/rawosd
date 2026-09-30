@@ -2,6 +2,7 @@
 
 ## 0.1.0 - 2026-09-29
 
+* Consume `_RAWM_STATE` version 2 work-area geometry so OSD placement stays clear of panel/dock reservations; restore selected/highlight colors for ordinary feedback and floating colors for elevated/live geometry.
 Initial standalone release extracted from rawm's transient presentation
 responsibility.
 

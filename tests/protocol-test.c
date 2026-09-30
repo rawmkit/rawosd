@@ -60,15 +60,15 @@ static void
 test_state(void)
 {
   static const char snapshot[] =
-    "rawm-state-v1\n"
+    "rawm-state-v2\n"
     "tag-count\t3\n"
     "selected-monitor\t1\n"
-    "monitor\t0\t0\t0\t0\t1920\t1080\t00000001\t00000003\t00000000\ttile\t0x0\t1\t0.550000\n"
+    "monitor\t0\t0\t0\t0\t1920\t1080\t0\t24\t1920\t1056\t00000001\t00000003\t00000000\ttile\t0x0\t1\t0.550000\n"
     "stack\t0\t0\t2\n"
     "tag\t0\t1\t1\n"
     "tag\t0\t2\tweb%25dev\n"
     "tag\t0\t3\tchat\n"
-    "monitor\t1\t1\t1920\t0\t1920\t1080\t00000006\t00000006\t00000004\tgrid\t0x1234\t2\t0.600000\n"
+    "monitor\t1\t1\t1920\t0\t1920\t1080\t1920\t24\t1920\t1056\t00000006\t00000006\t00000004\tgrid\t0x1234\t2\t0.600000\n"
     "stack\t1\t1\t1\n"
     "tag\t1\t1\tone\n"
     "tag\t1\t2\ttwo\n"
@@ -84,6 +84,7 @@ test_state(void)
   monitor = rawosd_state_monitor(&state, 1);
   expect(monitor != NULL && monitor->selected == 1 &&
          monitor->x == 1920 && monitor->width == 1920 &&
+         monitor->work_y == 24 && monitor->work_height == 1056 &&
          monitor->viewed == 0x6 && strcmp(monitor->layout, "grid") == 0 &&
          monitor->focused == 0x1234 && monitor->nmaster == 2 &&
          monitor->focused_index == 1 && monitor->visible_count == 1,
@@ -96,27 +97,27 @@ test_state(void)
   rawosd_state_destroy(&state);
 
   expect(rawosd_state_parse(
-           "rawm-state-v1\n\ntag-count\t1\nselected-monitor\t-1\n",
+           "rawm-state-v2\n\ntag-count\t1\nselected-monitor\t-1\n",
            &state, NULL) < 0,
          "blank state record accepted");
   expect(rawosd_state_parse(
-           "rawm-state-v2\ntag-count\t1\nselected-monitor\t-1\n",
+           "rawm-state-v1\ntag-count\t1\nselected-monitor\t-1\n",
            &state, NULL) < 0,
          "unsupported state version accepted");
   expect(rawosd_state_parse(
-           "rawm-state-v1\ntag-count\t1\nselected-monitor\t0\n"
+           "rawm-state-v2\ntag-count\t1\nselected-monitor\t0\n"
            "unknown\t0\n",
            &state, NULL) < 0,
          "unknown state record accepted");
   expect(rawosd_state_parse(
-           "rawm-state-v1\ntag-count\t1\nselected-monitor\t0\n"
-           "monitor\t0\t1\t0\t0\t800\t600\t00000001\t00000001\t00000000\ttile\t0x0\t1\t0.550000\n"
+           "rawm-state-v2\ntag-count\t1\nselected-monitor\t0\n"
+           "monitor\t0\t1\t0\t0\t800\t600\t0\t0\t800\t600\t00000001\t00000001\t00000000\ttile\t0x0\t1\t0.550000\n"
            "tag\t0\t1\t1\n",
            &state, NULL) < 0,
          "state without stack record accepted");
   expect(rawosd_state_parse(
-           "rawm-state-v1\ntag-count\t1\nselected-monitor\t0\n"
-           "monitor\t0\t1\t0\t0\t800\t600\t+0000001\t00000001\t00000000\ttile\t0x0\t1\t0.550000\n"
+           "rawm-state-v2\ntag-count\t1\nselected-monitor\t0\n"
+           "monitor\t0\t1\t0\t0\t800\t600\t0\t0\t800\t600\t+0000001\t00000001\t00000000\ttile\t0x0\t1\t0.550000\n"
            "stack\t0\t0\t0\n"
            "tag\t0\t1\t1\n",
            &state, NULL) < 0,

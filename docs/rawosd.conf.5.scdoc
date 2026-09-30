@@ -39,7 +39,7 @@ per-user file may layer over it as described in *rawosd*(1).
 
 # COLORS
 
-The *colors* group accepts *normal* and *floating*. Each group accepts:
+The *colors* group accepts *selected* and *floating*. Each group accepts:
 
 *foreground* = _string_
 	Xft text color.
@@ -50,9 +50,9 @@ The *colors* group accepts *normal* and *floating*. Each group accepts:
 *accent* = _string_
 	Color of the small bottom marker.
 
-The stock normal and floating schemes use white text on *#0066ff* with the same
+The stock selected and floating schemes use white text on *#0066ff* with the same
 blue accent. The floating scheme is selected for live geometry and the elevated
-state of a floating client; other events use the normal scheme.
+state of a floating client; other events use the selected scheme.
 
 # LAYOUT SYMBOLS
 
@@ -80,7 +80,7 @@ offset = 16;
 min_width = 160;
 
 colors = {
-  normal = {
+  selected = {
     foreground = "#ffffff";
     background = "#0066ff";
     accent = "#0066ff";

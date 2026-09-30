@@ -424,7 +424,7 @@ parse_monitor_record(RawosdState *state, char **fields, size_t count)
   RawosdMonitorState *monitor;
   int selected;
 
-  if (count != 14)
+  if (count != 18)
     return -1;
   monitor = state_add_monitor(state);
   if (!monitor)
@@ -437,17 +437,22 @@ parse_monitor_record(RawosdState *state, char **fields, size_t count)
       parse_int(fields[5], &monitor->width) < 0 ||
       parse_int(fields[6], &monitor->height) < 0 ||
       monitor->width <= 0 || monitor->height <= 0 ||
-      parse_u32_hex(fields[7], &monitor->viewed) < 0 ||
-      parse_u32_hex(fields[8], &monitor->occupied) < 0 ||
-      parse_u32_hex(fields[9], &monitor->urgent) < 0 ||
-      strlen(fields[10]) >= sizeof(monitor->layout) || !layout_valid(fields[10]) ||
-      parse_ulong_hex(fields[11], &monitor->focused) < 0 ||
-      parse_int(fields[12], &monitor->nmaster) < 0 || monitor->nmaster < 0 ||
-      parse_double(fields[13], &monitor->mfact) < 0 ||
+      parse_int(fields[7], &monitor->work_x) < 0 ||
+      parse_int(fields[8], &monitor->work_y) < 0 ||
+      parse_int(fields[9], &monitor->work_width) < 0 ||
+      parse_int(fields[10], &monitor->work_height) < 0 ||
+      monitor->work_width <= 0 || monitor->work_height <= 0 ||
+      parse_u32_hex(fields[11], &monitor->viewed) < 0 ||
+      parse_u32_hex(fields[12], &monitor->occupied) < 0 ||
+      parse_u32_hex(fields[13], &monitor->urgent) < 0 ||
+      strlen(fields[14]) >= sizeof(monitor->layout) || !layout_valid(fields[14]) ||
+      parse_ulong_hex(fields[15], &monitor->focused) < 0 ||
+      parse_int(fields[16], &monitor->nmaster) < 0 || monitor->nmaster < 0 ||
+      parse_double(fields[17], &monitor->mfact) < 0 ||
       monitor->mfact < 0.1 || monitor->mfact > 0.9)
     return -1;
   monitor->selected = selected;
-  memcpy(monitor->layout, fields[10], strlen(fields[10]) + 1u);
+  memcpy(monitor->layout, fields[14], strlen(fields[14]) + 1u);
   return 0;
 }
 
@@ -509,7 +514,7 @@ rawosd_state_parse(const char *snapshot, RawosdState *state, FILE *err)
     return fail(err, "out of memory parsing state");
 
   line = strtok_r(copy, "\n", &save);
-  if (!line || strcmp(line, "rawm-state-v1") != 0)
+  if (!line || strcmp(line, "rawm-state-v2") != 0)
     goto malformed;
   line_number++;
 
@@ -541,12 +546,12 @@ rawosd_state_parse(const char *snapshot, RawosdState *state, FILE *err)
 
   while ((line = strtok_r(NULL, "\n", &save)) != NULL)
   {
-    char *fields[16];
+    char *fields[18];
     size_t count;
 
     line_number++;
-    count = split_fields(line, fields, 16);
-    if (count == 0 || count > 16)
+    count = split_fields(line, fields, 18);
+    if (count == 0 || count > 18)
       goto malformed;
     if (strcmp(fields[0], "monitor") == 0)
     {

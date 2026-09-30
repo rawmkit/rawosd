@@ -33,7 +33,7 @@ For every new feedback event, rawosd rereads `_RAWM_STATE`. It accepts only the
 version-1 snapshot emitted by rawm:
 
 ```
-rawm-state-v1
+rawm-state-v2
 tag-count<TAB>N
 selected-monitor<TAB>N
 ```
@@ -52,7 +52,8 @@ tag<TAB>MONITOR<TAB>ONE-BASED-INDEX<TAB>NAME
 ```
 
 Tag text decodes `%HH` escapes as defined by rawm. rawosd uses full monitor
-geometry from `monitor`; it does not reconstruct panel-adjusted work areas.
+and work-area geometry from `monitor`; presentation is placed inside rawm's
+authoritative work area and never reconstructs dock/strut reservations.
 
 ## Failure model
 
