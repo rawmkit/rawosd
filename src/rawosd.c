@@ -249,6 +249,10 @@ main(int argc, char **argv)
         rawosd_renderer_hide(&renderer);
         next_owner_poll = 0;
       }
+      else if (event.type == VisibilityNotify &&
+               rawosd_renderer_handle_visibility(&renderer,
+                                                  &event.xvisibility))
+        ;
       else if (event.type == Expose &&
                rawosd_renderer_is_expose(&renderer, &event.xexpose))
         rawosd_renderer_redraw(&renderer);

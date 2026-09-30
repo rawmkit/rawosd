@@ -54,6 +54,79 @@ find_rawosd(Display *display)
   return result;
 }
 
+static int
+window_above(Display *display, Window lower, Window upper)
+{
+  Window root = RootWindow(display, DefaultScreen(display));
+  Window root_return;
+  Window parent_return;
+  Window *children = NULL;
+  unsigned int count = 0;
+  unsigned int i;
+  int lower_index = -1;
+  int upper_index = -1;
+
+  if (!XQueryTree(display, root, &root_return, &parent_return,
+                  &children, &count))
+    return 0;
+  for (i = 0; i < count; ++i)
+  {
+    if (children[i] == lower)
+      lower_index = (int)i;
+    if (children[i] == upper)
+      upper_index = (int)i;
+  }
+  if (children)
+    XFree(children);
+  return lower_index >= 0 && upper_index > lower_index;
+}
+
+static int
+test_above_cover(Display *display, int timeout_ms)
+{
+  Window root = RootWindow(display, DefaultScreen(display));
+  Window osd = None;
+  Window cover = None;
+  XWindowAttributes attributes;
+  int elapsed = 0;
+  int result = EXIT_FAILURE;
+
+  while (elapsed <= timeout_ms)
+  {
+    osd = find_rawosd(display);
+    if (osd != None && XGetWindowAttributes(display, osd, &attributes) &&
+        attributes.map_state == IsViewable)
+      break;
+    sleep_ms(20);
+    elapsed += 20;
+  }
+  if (osd == None || elapsed > timeout_ms)
+    return EXIT_FAILURE;
+
+  cover = XCreateSimpleWindow(display, root, attributes.x, attributes.y,
+                              (unsigned int)attributes.width,
+                              (unsigned int)attributes.height, 0, 0, 0);
+  if (cover == None)
+    return EXIT_FAILURE;
+  XMapRaised(display, cover);
+  XSync(display, False);
+
+  elapsed = 0;
+  while (elapsed <= timeout_ms)
+  {
+    if (window_above(display, cover, osd))
+    {
+      result = EXIT_SUCCESS;
+      break;
+    }
+    sleep_ms(20);
+    elapsed += 20;
+  }
+  XDestroyWindow(display, cover);
+  XSync(display, False);
+  return result;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -63,12 +136,13 @@ main(int argc, char **argv)
   int elapsed = 0;
 
   if (argc != 3 ||
-      (strcmp(argv[1], "viewable") != 0 && strcmp(argv[1], "hidden") != 0))
+      (strcmp(argv[1], "viewable") != 0 &&
+       strcmp(argv[1], "hidden") != 0 &&
+       strcmp(argv[1], "above-cover") != 0))
   {
-    fprintf(stderr, "usage: %s viewable|hidden TIMEOUT-MS\n", argv[0]);
+    fprintf(stderr, "usage: %s viewable|hidden|above-cover TIMEOUT-MS\n", argv[0]);
     return EXIT_FAILURE;
   }
-  want_viewable = strcmp(argv[1], "viewable") == 0;
   timeout_ms = atoi(argv[2]);
   if (timeout_ms < 0)
     return EXIT_FAILURE;
@@ -76,6 +150,14 @@ main(int argc, char **argv)
   if (!display)
     return EXIT_FAILURE;
 
+  if (strcmp(argv[1], "above-cover") == 0)
+  {
+    int result = test_above_cover(display, timeout_ms);
+    XCloseDisplay(display);
+    return result;
+  }
+
+  want_viewable = strcmp(argv[1], "viewable") == 0;
   while (elapsed <= timeout_ms)
   {
     Window window = find_rawosd(display);

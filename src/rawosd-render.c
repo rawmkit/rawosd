@@ -356,7 +356,7 @@ rawosd_renderer_init(RawosdRenderer *renderer, Display *display, int screen,
   attributes.override_redirect = True;
   attributes.background_pixel =
     renderer->colors[RAWOSD_SCHEME_SELECTED][RAWOSD_COLOR_BACKGROUND].pixel;
-  attributes.event_mask = ExposureMask;
+  attributes.event_mask = ExposureMask | VisibilityChangeMask;
   renderer->window = XCreateWindow(
     display, renderer->root, 0, 0, 1, 1, 0,
     DefaultDepth(display, screen), CopyFromParent,
@@ -559,6 +559,22 @@ rawosd_renderer_is_expose(const RawosdRenderer *renderer,
 {
   return renderer && event && event->window == renderer->window &&
          renderer->visible;
+}
+
+bool
+rawosd_renderer_handle_visibility(RawosdRenderer *renderer,
+                                   const XVisibilityEvent *event)
+{
+  if (!renderer || !event || event->window != renderer->window ||
+      !renderer->visible)
+    return false;
+
+  if (event->state != VisibilityUnobscured)
+  {
+    XRaiseWindow(renderer->display, renderer->window);
+    XFlush(renderer->display);
+  }
+  return true;
 }
 
 void

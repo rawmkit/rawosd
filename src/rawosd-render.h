@@ -53,6 +53,8 @@ void rawosd_renderer_expire(RawosdRenderer *renderer);
 int rawosd_renderer_timeout(const RawosdRenderer *renderer);
 bool rawosd_renderer_is_expose(const RawosdRenderer *renderer,
                                const XExposeEvent *event);
+bool rawosd_renderer_handle_visibility(RawosdRenderer *renderer,
+                                       const XVisibilityEvent *event);
 void rawosd_renderer_redraw(RawosdRenderer *renderer);
 
 #endif

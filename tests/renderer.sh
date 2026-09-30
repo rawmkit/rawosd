@@ -77,6 +77,11 @@ if ! "$probe" viewable 1500; then
   cat "$tmp/rawosd.log" >&2 || true
   exit 1
 fi
+if ! "$probe" above-cover 1500; then
+  echo "renderer test failed: rawosd did not recover top-most stacking" >&2
+  cat "$tmp/rawosd.log" >&2 || true
+  exit 1
+fi
 wait "$fake_pid"
 fake_pid=
 if ! "$probe" hidden 1500; then
