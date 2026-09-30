@@ -82,7 +82,7 @@ window_above(Display *display, Window lower, Window upper)
 }
 
 static int
-test_above_cover(Display *display, int timeout_ms)
+test_cover_above(Display *display, int timeout_ms)
 {
   Window root = RootWindow(display, DefaultScreen(display));
   Window osd = None;
@@ -114,7 +114,7 @@ test_above_cover(Display *display, int timeout_ms)
   elapsed = 0;
   while (elapsed <= timeout_ms)
   {
-    if (window_above(display, cover, osd))
+    if (window_above(display, osd, cover))
     {
       result = EXIT_SUCCESS;
       break;
@@ -138,9 +138,9 @@ main(int argc, char **argv)
   if (argc != 3 ||
       (strcmp(argv[1], "viewable") != 0 &&
        strcmp(argv[1], "hidden") != 0 &&
-       strcmp(argv[1], "above-cover") != 0))
+       strcmp(argv[1], "cover-above") != 0))
   {
-    fprintf(stderr, "usage: %s viewable|hidden|above-cover TIMEOUT-MS\n", argv[0]);
+    fprintf(stderr, "usage: %s viewable|hidden|cover-above TIMEOUT-MS\n", argv[0]);
     return EXIT_FAILURE;
   }
   timeout_ms = atoi(argv[2]);
@@ -150,9 +150,9 @@ main(int argc, char **argv)
   if (!display)
     return EXIT_FAILURE;
 
-  if (strcmp(argv[1], "above-cover") == 0)
+  if (strcmp(argv[1], "cover-above") == 0)
   {
-    int result = test_above_cover(display, timeout_ms);
+    int result = test_cover_above(display, timeout_ms);
     XCloseDisplay(display);
     return result;
   }

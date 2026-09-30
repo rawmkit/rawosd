@@ -2,8 +2,13 @@
 
 ## 0.1.0 - 2026-09-29
 
-* Keep the transient OSD above normal client windows while it is visible, even if another client is raised after the feedback window maps.
-* Consume `_RAWM_STATE` version 2 work-area geometry so OSD placement stays clear of panel/dock reservations; restore selected/highlight colors for ordinary feedback and floating colors for elevated/live geometry.
+* Keep transient OSD stacking outside window-manager ownership: rawosd maps
+  feedback raised when it appears but does not fight later external root
+  surfaces; rawm preserves external transient surfaces when raising admitted
+  clients.
+* Consume `_RAWM_STATE` version 2 work-area geometry so OSD placement stays
+  clear of panel/dock reservations; restore selected/highlight colors for
+  ordinary feedback and floating colors for elevated/live geometry.
 Initial standalone release extracted from rawm's transient presentation
 responsibility.
 

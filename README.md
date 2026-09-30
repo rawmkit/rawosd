@@ -79,6 +79,15 @@ work area after dock/strut reservations. rawosd positions entirely inside that
 work area. It does not inspect docks, struts, the X window tree, or EWMH state to
 reconstruct placement authority.
 
+### Stacking
+
+The feedback window is mapped raised when a new notification is presented, but
+rawosd does not continuously re-raise itself when another external root surface
+appears later. rawm owns admitted-client stacking and preserves unrelated
+override-redirect presentation surfaces that are already above a client when that
+client is raised. This keeps OSD, tray-menu, tooltip, and similar external
+stacking policy outside both components' private state.
+
 ## Build
 
 Dependencies:

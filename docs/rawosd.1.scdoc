@@ -70,6 +70,12 @@ The feedback surface is an override-redirect X11 notification window. Placement
 uses the work-area geometry published in *\_RAWM\_STATE* version 2. rawosd does
 not derive work areas from docks, struts, EWMH properties, or the X window tree.
 
+A newly presented notification is mapped raised. rawosd does not continuously
+re-raise it over root-level surfaces that appear later; ordering between
+independent override-redirect presentation surfaces remains external to rawosd.
+rawm is expected to preserve external transient surfaces when managed clients
+are raised.
+
 Live move and resize records are ignored unless *geometry* is enabled in the
 rawosd configuration.
 
