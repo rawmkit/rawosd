@@ -2,6 +2,7 @@ project(
   'rawosd',
   'c',
   version: '0.1.0',
+  license: 'MIT',
   meson_version: '>=1.6.0',
   default_options: [
     'c_std=c99',
@@ -41,4 +42,8 @@ install_data(
   'README.md',
   'NEWS.md',
   install_dir: join_paths(get_option('datadir'), 'doc', 'rawosd'),
+)
+install_data(
+  'LICENSE',
+  install_dir: join_paths(get_option('datadir'), 'licenses', 'rawosd'),
 )

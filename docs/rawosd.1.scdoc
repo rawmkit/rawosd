@@ -27,6 +27,9 @@ presentation. No rawm restart or configuration change is required.
 *-c* _path_
 	Load only the specified configuration file. The path must exist.
 
+*-C*
+	Validate the effective configuration and exit without opening the X display.
+
 *-h*
 	Print usage and exit.
 
